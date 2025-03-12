@@ -1,0 +1,30 @@
+name = "Minerva"
+prefix = "minerva"
+modname = "minerva"
+mainprefix = "dw"
+
+[properties]
+author = "Kozak"
+
+[version]
+major = 0
+minor = 1
+patch = 0
+build = 0
+
+[files]
+include = ["*.dll", "*.so", "README.md"]
+
+show_output = true
+
+[hemtt.launch.default]
+workshop = [
+    "450814997", # CBA_A3
+]
+parameters = [
+    "-skipIntro",
+    "-noSplash",
+    "-showScriptErrors",
+    "-debug",
+    "-filePatching",
+]

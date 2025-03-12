@@ -1,0 +1,12 @@
+[package]
+name = "minerva-arma3"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+bench = false
+crate-type = ["cdylib", "rlib"]
+name = "minerva_x64"
+
+[dependencies]
+arma-rs = "1.11.11"

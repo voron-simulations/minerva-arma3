@@ -10,3 +10,7 @@ name = "minerva_x64"
 
 [dependencies]
 arma-rs = "1.11.11"
+prost = "0.14.1"
+
+[build-dependencies]
+prost-build = "0.14.1"

@@ -9,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 name = "minerva_x64"
 
 [dependencies]
-arma-rs = "1.11.11"
+arma-rs = "1.11.15"
 prost = "0.14.1"
 
 [build-dependencies]

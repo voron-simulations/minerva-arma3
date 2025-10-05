@@ -19,9 +19,9 @@ checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 
 [[package]]
 name = "arma-rs"
-version = "1.11.14"
+version = "1.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23f1ac886e9c83408207d2851eb61fddc568975ffde2dfc387d466dc3367cb93"
+checksum = "2a187c0f0594c3cef75b79cba42022e841da290092777486318d6d5d164f74d2"
 dependencies = [
  "arma-rs-proc",
  "crossbeam-channel",

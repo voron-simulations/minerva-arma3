@@ -5,6 +5,7 @@ class CfgFunctions {
             class call {};
             class getMessages {};
             class messageSend {};
+            class waypointCompleteEventHandler {};
         };
     };
 };

@@ -1,0 +1,105 @@
+name: Build
+
+on:
+  workflow_call:
+
+jobs:
+  build-extension-windows-x64:
+    name: Build extension (Windows x64)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+                
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+          
+      - name: Init Cargo cache
+        uses: Swatinem/rust-cache@v2
+      
+      - name: Build
+        run: cargo build --release
+      
+      - name: Test
+        run: cargo test --release
+      
+      - name: Move library
+        run: move target/release/dynops.dll dynops_x64.dll
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-x64-windows
+          path: dynops_x64.dll
+          retention-days: 1
+
+  build-extension-linux-x64:
+    name: Build extension (Linux x64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+          
+      - name: Init Cargo cache
+        uses: Swatinem/rust-cache@v2
+          
+      - name: Build
+        run: cargo build --release
+      
+      - name: Test
+        run: cargo test --release
+      
+      - name: Move library
+        run: mv target/release/libdynops.so dynops_x64.so
+
+      - name: Strip library
+        run: strip --strip-unneeded --keep-file-symbols dynops_x64.so
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-x64-linux
+          path: dynops_x64.so
+          retention-days: 1
+
+  build:
+    name: Build addon
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+     - build-extension-windows-x64
+     - build-extension-linux-x64
+     
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      
+    - name: Download Windows x64
+      uses: actions/download-artifact@v5
+      with:
+        name: extension-x64-windows
+        path: .
+
+    - name: Download Linux x64
+      uses: actions/download-artifact@v5
+      with:
+        name: extension-x64-linux
+        path: .
+    
+    - name: Install HEMTT
+      uses: arma-actions/hemtt@main
+
+    - name: Run HEMTT build
+      run: hemtt release
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: addon
+        path: releases/dynops-latest.zip
+        if-no-files-found: error

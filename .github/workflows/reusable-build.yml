@@ -11,22 +11,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-                
+        with:
+          submodules: recursive
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-          
+
+      - name: Install Protobuf
+        uses: arduino/setup-protoc@v3
+
       - name: Init Cargo cache
         uses: Swatinem/rust-cache@v2
-      
+
       - name: Build
         run: cargo build --release
-      
+
       - name: Test
         run: cargo test --release
-      
+
       - name: Move library
         run: move target/release/dynops.dll dynops_x64.dll
-          
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -41,19 +46,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        
+        with:
+          submodules: recursive
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-          
+
+      - name: Install Protobuf
+        uses: arduino/setup-protoc@v3
+
       - name: Init Cargo cache
         uses: Swatinem/rust-cache@v2
-          
+
       - name: Build
         run: cargo build --release
-      
+
       - name: Test
         run: cargo test --release
-      
+
       - name: Move library
         run: mv target/release/libdynops.so dynops_x64.so
 
@@ -72,34 +82,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:
-     - build-extension-windows-x64
-     - build-extension-linux-x64
-     
+      - build-extension-windows-x64
+      - build-extension-linux-x64
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-      
-    - name: Download Windows x64
-      uses: actions/download-artifact@v5
-      with:
-        name: extension-x64-windows
-        path: .
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
 
-    - name: Download Linux x64
-      uses: actions/download-artifact@v5
-      with:
-        name: extension-x64-linux
-        path: .
-    
-    - name: Install HEMTT
-      uses: arma-actions/hemtt@main
+      - name: Download Windows x64
+        uses: actions/download-artifact@v5
+        with:
+          name: extension-x64-windows
+          path: .
 
-    - name: Run HEMTT build
-      run: hemtt release
+      - name: Download Linux x64
+        uses: actions/download-artifact@v5
+        with:
+          name: extension-x64-linux
+          path: .
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: addon
-        path: releases/dynops-latest.zip
-        if-no-files-found: error
+      - name: Install HEMTT
+        uses: arma-actions/hemtt@main
+
+      - name: Run HEMTT build
+        run: hemtt release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: addon
+          path: releases/dynops-latest.zip
+          if-no-files-found: error

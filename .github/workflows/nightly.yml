@@ -64,8 +64,8 @@ jobs:
           vt_api_key: ${{ secrets.VIRUSTOTAL_APIKEY }}
           request_rate: 4
           files: |
-            ./dynops_x64.dll
-            ./dynops_x64.so
+            ./minerva_x64.dll
+            ./minerva_x64.so
 
   pre-release:
     needs: [build]

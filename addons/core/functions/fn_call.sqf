@@ -2,7 +2,7 @@ private _function = param [0, "echo", [""]];
 private _args = param [1, [], [[]]];
 
 // Call the extension and process the error codes
-private _resultArray = "dynops" callExtension [_function, _args];
+private _resultArray = "minerva_x64" callExtension [_function, _args];
 
 _resultArray params ["_result", "_retcode", "_errcode"];
 if (_errcode != 0 && _errcode != 301) then {

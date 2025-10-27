@@ -92,13 +92,13 @@ jobs:
           submodules: recursive
 
       - name: Download Windows x64
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: extension-x64-windows
           path: .
 
       - name: Download Linux x64
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: extension-x64-linux
           path: .

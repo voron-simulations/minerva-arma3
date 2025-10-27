@@ -47,13 +47,13 @@ jobs:
 
     steps:
       - name: Download Windows x64
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: extension-x64-windows
           path: .
   
       - name: Download Linux x64
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: extension-x64-linux
           path: .
@@ -75,7 +75,7 @@ jobs:
       contents: write
     steps:
     - name: Download Addon
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: addon
         path: .

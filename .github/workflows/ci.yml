@@ -1,7 +1,18 @@
-name: Build
+name: CI
 
 on:
-  workflow_call:
+  push:
+    branches:
+      - main
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+    paths-ignore:
+    - README.md
+    - .git*
+
+permissions:
+  contents: read
 
 jobs:
   build-extension-windows-x64:

@@ -28,6 +28,9 @@ jobs:
         with:
           components: clippy
 
+      - name: Install Protobuf
+        uses: arduino/setup-protoc@v3
+        
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 

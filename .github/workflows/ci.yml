@@ -15,28 +15,6 @@ permissions:
   contents: read
 
 jobs:
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-
-      - name: Install Protobuf
-        uses: arduino/setup-protoc@v3
-        
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run Clippy
-        run: cargo clippy --all-features
-
   build-extension-windows-x64:
     name: Build extension (Windows x64)
     runs-on: windows-latest

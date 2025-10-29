@@ -6,7 +6,7 @@ edition = "2021"
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
-name = "minerva_x64"
+name = "minerva"
 
 [dependencies]
 arma-rs = "1.11.15"

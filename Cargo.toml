@@ -11,6 +11,9 @@ name = "minerva_x64"
 [dependencies]
 arma-rs = "1.11.15"
 prost = "0.14.1"
+tonic = "0.14.2"
+tonic-prost = "0.14.2"
 
 [build-dependencies]
-prost-build = "0.14.1"
+glob = "0.3.3"
+tonic-prost-build = "^0.14"

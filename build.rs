@@ -1,6 +1,5 @@
 extern crate prost_build;
 
 fn main() {
-    prost_build::compile_protos(&["proto/core.proto"],
-                                &["proto/"]).unwrap();
+    prost_build::compile_protos(&["proto/*.proto"], &["proto/"]).unwrap();
 }

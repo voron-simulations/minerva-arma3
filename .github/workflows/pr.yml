@@ -17,9 +17,10 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     permissions:
       contents: read
-    
+
   clippy:
     name: Clippy
     uses: ./.github/workflows/reusable-clippy.yml
     permissions:
+      contents: read
       security-events: write

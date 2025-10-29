@@ -9,7 +9,7 @@ permissions:
   contents: write
   actions: write
 
-jobs:  
+jobs:
   check:
     name: Pre-check
     runs-on: 'ubuntu-latest'
@@ -36,7 +36,7 @@ jobs:
     name: Build
     needs: [check]
     uses: ./.github/workflows/reusable-build.yml
-    
+
   virustotal:
     needs: [build]
     name: VirusTotal Scan
@@ -51,21 +51,21 @@ jobs:
         with:
           name: extension-x64-windows
           path: .
-  
+
       - name: Download Linux x64
         uses: actions/download-artifact@v5
         with:
           name: extension-x64-linux
           path: .
-          
+
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v4
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_APIKEY }}
           request_rate: 4
           files: |
-            ./dynops_x64.dll
-            ./dynops_x64.so
+            ./minerva_x64.dll
+            ./minerva_x64.so
 
   pre-release:
     needs: [build]
@@ -79,7 +79,7 @@ jobs:
       with:
         name: addon
         path: .
-        
+
     - name: Push pre-release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -87,4 +87,4 @@ jobs:
         automatic_release_tag: "latest"
         prerelease: true
         title: "Development build"
-        files: dynops-latest.zip
+        files: minerva-latest.zip

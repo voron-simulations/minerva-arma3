@@ -30,13 +30,13 @@ jobs:
         run: cargo test --release
 
       - name: Move library
-        run: move target/release/dynops.dll dynops_x64.dll
+        run: move target/release/minerva.dll minerva_x64.dll
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: extension-x64-windows
-          path: dynops_x64.dll
+          path: minerva_x64.dll
           retention-days: 1
 
   build-extension-linux-x64:
@@ -65,16 +65,16 @@ jobs:
         run: cargo test --release
 
       - name: Move library
-        run: mv target/release/libdynops.so dynops_x64.so
+        run: mv target/release/libminerva.so minerva_x64.so
 
       - name: Strip library
-        run: strip --strip-unneeded --keep-file-symbols dynops_x64.so
+        run: strip --strip-unneeded --keep-file-symbols minerva_x64.so
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: extension-x64-linux
-          path: dynops_x64.so
+          path: minerva_x64.so
           retention-days: 1
 
   build:
@@ -113,5 +113,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: addon
-          path: releases/dynops-latest.zip
+          path: releases/minerva-latest.zip
           if-no-files-found: error

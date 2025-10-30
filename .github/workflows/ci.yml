@@ -44,7 +44,7 @@ jobs:
         run: move target/release/minerva.dll minerva_x64.dll
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: extension-x64-windows
           path: minerva_x64.dll
@@ -82,7 +82,7 @@ jobs:
         run: strip --strip-unneeded --keep-file-symbols minerva_x64.so
 
       - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: extension-x64-linux
           path: minerva_x64.so
@@ -121,7 +121,7 @@ jobs:
         run: hemtt release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: addon
           path: releases/minerva-latest.zip

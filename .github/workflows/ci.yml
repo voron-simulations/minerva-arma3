@@ -33,7 +33,7 @@ jobs:
           tool: protoc
 
       - name: Init Cargo cache
-        uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2
+        uses: Swatinem/rust-cache@b5ec9edd911d3bf82c74038b0a28791e0aa24d6f # v2.0.2
 
       - name: Build
         run: cargo build --release
@@ -69,7 +69,7 @@ jobs:
           tool: protoc
 
       - name: Init Cargo cache
-        uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2
+        uses: Swatinem/rust-cache@b5ec9edd911d3bf82c74038b0a28791e0aa24d6f # v2.0.2
 
       - name: Build
         run: cargo build --release

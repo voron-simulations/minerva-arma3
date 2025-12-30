@@ -28,7 +28,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - uses: taiki-e/install-action@4c6723ec9c638cccae824b8957c5085b695c8085 # v2.65.7
+      - uses: taiki-e/install-action@12a06cb21bb5f4b6f9dc82f1dc17737960f5365b # v2.65.9
         with:
           tool: protoc
 
@@ -64,7 +64,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - uses: taiki-e/install-action@4c6723ec9c638cccae824b8957c5085b695c8085 # v2.65.7
+      - uses: taiki-e/install-action@12a06cb21bb5f4b6f9dc82f1dc17737960f5365b # v2.65.9
         with:
           tool: protoc
 

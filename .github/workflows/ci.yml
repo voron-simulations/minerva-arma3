@@ -26,7 +26,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
 
       - uses: taiki-e/install-action@06203676c62f0d3c765be3f2fcfbebbcb02d09f5 # v2.69.6
         with:
@@ -62,7 +62,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
 
       - uses: taiki-e/install-action@06203676c62f0d3c765be3f2fcfbebbcb02d09f5 # v2.69.6
         with:
@@ -117,7 +117,7 @@ jobs:
           path: .
 
       - name: Install HEMTT
-        uses: arma-actions/hemtt@main
+        uses: arma-actions/hemtt@f3c3f2d81c9439070b832c9dbbba7b53b743b0a4 # main
 
       - name: Run HEMTT build
         run: hemtt release

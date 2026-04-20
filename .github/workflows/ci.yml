@@ -117,7 +117,7 @@ jobs:
           path: .
 
       - name: Install HEMTT
-        uses: arma-actions/hemtt@f3c3f2d81c9439070b832c9dbbba7b53b743b0a4 # main
+        uses: arma-actions/hemtt@c9b053ccf9755334a612618700e2efe79fd9c59c # main
 
       - name: Run HEMTT build
         run: hemtt release

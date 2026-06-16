@@ -118,8 +118,9 @@ jobs:
 
       - name: Install HEMTT
         run: |
-          curl -sSfL "https://github.com/BrettMayson/HEMTT/releases/latest/download/hemtt-x86_64-unknown-linux-gnu" -o /usr/local/bin/hemtt
-          chmod +x /usr/local/bin/hemtt
+          curl -sSfL "https://github.com/BrettMayson/HEMTT/releases/latest/download/linux-x64.zip" -o /tmp/hemtt.zip
+          unzip -q /tmp/hemtt.zip -d /tmp/hemtt
+          install -m 755 /tmp/hemtt/hemtt /usr/local/bin/hemtt
 
       - name: Run HEMTT build
         run: hemtt release

@@ -117,7 +117,10 @@ jobs:
           path: .
 
       - name: Install HEMTT
-        uses: arma-actions/hemtt@c9b053ccf9755334a612618700e2efe79fd9c59c # main
+        run: |
+          curl -sSfL "https://github.com/BrettMayson/HEMTT/releases/latest/download/linux-x64.zip" -o /tmp/hemtt.zip
+          unzip -q /tmp/hemtt.zip -d /tmp/hemtt
+          install -m 755 /tmp/hemtt/hemtt /usr/local/bin/hemtt
 
       - name: Run HEMTT build
         run: hemtt release

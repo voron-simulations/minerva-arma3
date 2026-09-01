@@ -1,0 +1,39 @@
+name: PR
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+    paths-ignore:
+    - README.md
+    - .git*
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  fmt:
+    name: Format
+    uses: ./.github/workflows/reusable-fmt.yml
+    permissions:
+      contents: read
+
+  build:
+    name: Build
+    needs: [clippy, fmt]
+    uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: read
+
+  clippy:
+    name: Clippy
+    uses: ./.github/workflows/reusable-clippy.yml
+    permissions:
+      contents: read
+      security-events: write

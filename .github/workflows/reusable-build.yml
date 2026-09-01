@@ -1,18 +1,11 @@
-name: CI
+name: Build
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
-    paths-ignore:
-    - README.md
-    - .git*
+  workflow_call:
 
-permissions:
-  contents: read
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
   build-extension-windows-x64:
@@ -24,21 +17,35 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
-      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
+      - name: Install protoc
+        uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
         with:
           tool: protoc
 
       - name: Init Cargo cache
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          add-job-id-key: false
+          cache-targets: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: Build
+        env:
+          RUSTC_WRAPPER: sccache
+          SCCACHE_GHA_ENABLED: "true"
         run: cargo build --release
 
       - name: Test
+        env:
+          RUSTC_WRAPPER: sccache
+          SCCACHE_GHA_ENABLED: "true"
         run: cargo test --release
 
       - name: Move library
@@ -50,6 +57,7 @@ jobs:
           name: extension-x64-windows
           path: minerva_x64.dll
           retention-days: 1
+          if-no-files-found: error
 
   build-extension-linux-x64:
     name: Build extension (Linux x64)
@@ -60,21 +68,35 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
-      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
+      - name: Install protoc
+        uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
         with:
           tool: protoc
 
       - name: Init Cargo cache
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          add-job-id-key: false
+          cache-targets: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: Build
+        env:
+          RUSTC_WRAPPER: sccache
+          SCCACHE_GHA_ENABLED: "true"
         run: cargo build --release
 
       - name: Test
+        env:
+          RUSTC_WRAPPER: sccache
+          SCCACHE_GHA_ENABLED: "true"
         run: cargo test --release
 
       - name: Move library
@@ -89,6 +111,7 @@ jobs:
           name: extension-x64-linux
           path: minerva_x64.so
           retention-days: 1
+          if-no-files-found: error
 
   build:
     name: Build addon
@@ -103,6 +126,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Download Windows x64
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -118,9 +142,10 @@ jobs:
 
       - name: Install HEMTT
         run: |
-          curl -sSfL "https://github.com/BrettMayson/HEMTT/releases/latest/download/linux-x64.zip" -o /tmp/hemtt.zip
-          unzip -q /tmp/hemtt.zip -d /tmp/hemtt
-          install -m 755 /tmp/hemtt/hemtt /usr/local/bin/hemtt
+          curl -fsSL https://github.com/BrettMayson/HEMTT/releases/latest/download/linux-x64.zip -o "$RUNNER_TEMP/hemtt.zip"
+          unzip -q "$RUNNER_TEMP/hemtt.zip" -d "$RUNNER_TEMP/hemtt"
+          chmod +x "$RUNNER_TEMP/hemtt/hemtt"
+          echo "$RUNNER_TEMP/hemtt" >> "$GITHUB_PATH"
 
       - name: Run HEMTT build
         run: hemtt release

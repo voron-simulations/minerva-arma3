@@ -36,4 +36,3 @@ jobs:
     uses: ./.github/workflows/reusable-clippy.yml
     permissions:
       contents: read
-      security-events: write

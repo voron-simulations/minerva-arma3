@@ -15,6 +15,19 @@ private _fnc_avg = {
     _sum / (count _values);
 };
 
+// Returns the group that owns a vehicle's record: that of the first unit
+// in a real crew seat (driver, then commander/gunner/turrets in fullCrew's
+// fixed order), or grpNull if only passengers (cargo/FFV) are aboard. One
+// deterministic owner per vehicle stops two groups sharing it -- as crew or
+// as passengers -- from alternately upserting it under their own group ids.
+private _fnc_vehicleOwner = {
+    params ["_vehicle"];
+    private _seats = fullCrew [_vehicle, "", false];
+    private _crewSeat = _seats findIf {(_x select 1) != "cargo" && {!(_x select 4)}};
+    if (_crewSeat < 0) exitWith {grpNull};
+    group (_seats select _crewSeat select 0)
+};
+
 ["sim:state", [date, accTime, overcast, wind]] call FUNC(call);
 
 private _emittedUnitIds = [];
@@ -38,37 +51,34 @@ private _emittedUnitIds = [];
     // No generic "ammo fraction" command exists for a mixed group; report
     // full until a real ammo model is built.
     private _ammoState = 1;
-    private _healthState = 1 - ([(units _group) apply {damage _x}] call _fnc_avg);
-    // The group's last waypoint is never removed by the engine, so a
-    // nonempty array doesn't mean there's still work left -- only an
-    // unreached one does.
-    private _hasTask = (currentWaypoint _group) < ((count _waypoints) - 1);
-
-    [
-        "group:upsert",
-        [_groupId, str (side _group), [_fuelState, _ammoState, _healthState], _hasTask, _waypoints]
-    ] call FUNC(call);
+    // Completed waypoints stay in `waypoints _group`; once the last one is
+    // done currentWaypoint moves one past the end, so only that means idle.
+    private _hasTask = (currentWaypoint _group) < (count _waypoints);
 
     // `units _group` gives the group's members, which for a crewed vehicle
     // are the crew (persons), not the vehicle -- report the vehicle itself
-    // for mounted members, deduplicated (a tank's whole crew maps to one
-    // vehicle), and the person directly for dismounted ones.
+    // for members of its owning group, deduplicated (a tank's whole crew
+    // maps to one vehicle), and the person directly for everyone else.
     private _trackedUnits = [];
     {
         private _unit = _x;
         if (isNull objectParent _unit) then {
             _trackedUnits pushBackUnique _unit;
         } else {
-            // Only the vehicle's actual crew (driver/gunner/commander)
-            // upserts it as their group's unit; a member merely riding as
-            // cargo in another group's vehicle is tracked as themselves,
-            // so two groups sharing a ride don't fight over who owns the
-            // vehicle record in the cache.
-            private _assignment = assignedVehicleRole _unit;
-            private _isCrew = (_assignment isNotEqualTo []) && {(_assignment select 0) != "Cargo"};
-            _trackedUnits pushBackUnique (if (_isCrew) then {vehicle _unit} else {_unit});
+            private _vehicle = objectParent _unit;
+            private _ownsVehicle = ([_vehicle] call _fnc_vehicleOwner) isEqualTo _group;
+            _trackedUnits pushBackUnique ([_unit, _vehicle] select _ownsVehicle);
         };
     } forEach (units _group);
+
+    // Over the same entities as the unit records below, so a wrecked tank
+    // with an unhurt crew doesn't report a healthy group.
+    private _healthState = 1 - ([_trackedUnits apply {damage _x}] call _fnc_avg);
+
+    [
+        "group:upsert",
+        [_groupId, str (side _group), [_fuelState, _ammoState, _healthState], _hasTask, _waypoints]
+    ] call FUNC(call);
 
     {
         private _unit = _x;
@@ -93,7 +103,11 @@ private _emittedUnitIds = [];
             [_unitId, _groupId, _kind, typeOf _unit, getPosASL _unit, getDir _unit, velocity _unit, damage _unit]
         ] call FUNC(call);
     } forEach _trackedUnits;
-} forEach allGroups;
+} forEach (allGroups select {
+    // sideLogic groups (modules, headless clients) have no protocol side;
+    // publishing them only produces rejected group upserts and orphaned units.
+    (side _x) in [west, east, independent, civilian]
+});
 
 // A unit whose emitted id changed since last tick (e.g. it boarded or left
 // a vehicle, switching between its own id and its transport's) would

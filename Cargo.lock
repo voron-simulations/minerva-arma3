@@ -232,7 +232,7 @@ dependencies = [
  "ciborium",
  "clap",
  "criterion-plot",
- "itertools 0.13.0",
+ "itertools",
  "num-traits",
  "oorandom",
  "plotters",
@@ -251,7 +251,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b1bcc0dc7dfae599d84ad0b1a55f80cde8af3725da8313b528da95ef783e338"
 dependencies = [
  "cast",
- "itertools 0.13.0",
+ "itertools",
 ]
 
 [[package]]
@@ -526,15 +526,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itertools"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
-dependencies = [
- "either",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -643,7 +634,7 @@ dependencies = [
 [[package]]
 name = "minerva-server"
 version = "0.1.0"
-source = "git+https://github.com/voron-simulations/minerva-server?branch=feat%2Fscaffold#a0961def8cc2bae7ac1cff7efc7670ff117fc0f8"
+source = "git+https://github.com/voron-simulations/minerva-server?rev=4c5f6a562f37a1e00444f9ba5b443d40522ebebf#4c5f6a562f37a1e00444f9ba5b443d40522ebebf"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -806,7 +797,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b570b25f7617e43d59005d0990ccb79e950a423952cea19671b7a876da390adf"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools",
  "proc-macro2",
  "quote",
  "syn 2.0.119",

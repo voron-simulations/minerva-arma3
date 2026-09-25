@@ -19,8 +19,8 @@ pushes Arma state into its `StateCache` and executes commands it dispatches back
 
 ## The `minerva-server` dependency
 
-Consumed as a `git` dependency (`Cargo.toml`), currently pinned to its `feat/scaffold`
-branch because that PR hasn't merged yet — switch to a tag/rev once it has.
+Consumed as a `git` dependency (`Cargo.toml`) pinned to a `main` commit `rev` (it has no
+tags yet); bump the `rev` to pick up server changes.
 
 For local development against a working copy, create a gitignored `.cargo/config.toml`:
 

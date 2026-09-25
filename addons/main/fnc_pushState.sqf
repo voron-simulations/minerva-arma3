@@ -46,8 +46,6 @@ private _emittedUnitIds = [];
         _waypoints pushBack [waypointType _x, AGLToASL (waypointPosition _x)];
     } forEach (waypoints _group);
 
-    private _fuelLevels = (units _group) select {!isNull objectParent _x} apply {fuel (vehicle _x)};
-    private _fuelState = [_fuelLevels] call _fnc_avg;
     // No generic "ammo fraction" command exists for a mixed group; report
     // full until a real ammo model is built.
     private _ammoState = 1;
@@ -71,8 +69,10 @@ private _emittedUnitIds = [];
         };
     } forEach (units _group);
 
-    // Over the same entities as the unit records below, so a wrecked tank
-    // with an unhurt crew doesn't report a healthy group.
+    // Fuel and health are over the same entities as the unit records below,
+    // so a wrecked tank with an unhurt crew doesn't report a healthy group,
+    // and a ride in another group's vehicle doesn't count as this one's fuel.
+    private _fuelState = [_trackedUnits select {!(_x isKindOf "Man")} apply {fuel _x}] call _fnc_avg;
     private _healthState = 1 - ([_trackedUnits apply {damage _x}] call _fnc_avg);
 
     [

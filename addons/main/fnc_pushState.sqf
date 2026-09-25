@@ -17,6 +17,8 @@ private _fnc_avg = {
 
 ["sim:state", [date, accTime, overcast, wind]] call FUNC(call);
 
+private _emittedUnitIds = [];
+
 {
     private _group = _x;
     private _groupId = [_group] call BIS_fnc_netId;
@@ -25,7 +27,10 @@ private _fnc_avg = {
     {
         // waypointType already returns a plain string; str() would add a
         // second layer of quoting that never matches convert::waypoint_type_from_str.
-        _waypoints pushBack [waypointType _x, waypointPosition _x];
+        // waypointPosition is always AGL regardless of how the waypoint was
+        // placed; convert to ASL to match the protocol's positions (and
+        // fnc_executeCommand.sqf's addWaypoint, which expects ASL back).
+        _waypoints pushBack [waypointType _x, AGLToASL (waypointPosition _x)];
     } forEach (waypoints _group);
 
     private _fuelLevels = (units _group) select {!isNull objectParent _x} apply {fuel (vehicle _x)};
@@ -34,10 +39,14 @@ private _fnc_avg = {
     // full until a real ammo model is built.
     private _ammoState = 1;
     private _healthState = 1 - ([(units _group) apply {damage _x}] call _fnc_avg);
+    // The group's last waypoint is never removed by the engine, so a
+    // nonempty array doesn't mean there's still work left -- only an
+    // unreached one does.
+    private _hasTask = (currentWaypoint _group) < ((count _waypoints) - 1);
 
     [
         "group:upsert",
-        [_groupId, str (side _group), [_fuelState, _ammoState, _healthState], _waypoints isNotEqualTo [], _waypoints]
+        [_groupId, str (side _group), [_fuelState, _ammoState, _healthState], _hasTask, _waypoints]
     ] call FUNC(call);
 
     // `units _group` gives the group's members, which for a crewed vehicle
@@ -46,7 +55,19 @@ private _fnc_avg = {
     // vehicle), and the person directly for dismounted ones.
     private _trackedUnits = [];
     {
-        _trackedUnits pushBackUnique (if (isNull objectParent _x) then {_x} else {vehicle _x});
+        private _unit = _x;
+        if (isNull objectParent _unit) then {
+            _trackedUnits pushBackUnique _unit;
+        } else {
+            // Only the vehicle's actual crew (driver/gunner/commander)
+            // upserts it as their group's unit; a member merely riding as
+            // cargo in another group's vehicle is tracked as themselves,
+            // so two groups sharing a ride don't fight over who owns the
+            // vehicle record in the cache.
+            private _assignment = assignedVehicleRole _unit;
+            private _isCrew = (_assignment isNotEqualTo []) && {(_assignment select 0) != "Cargo"};
+            _trackedUnits pushBackUnique (if (_isCrew) then {vehicle _unit} else {_unit});
+        };
     } forEach (units _group);
 
     {
@@ -65,9 +86,22 @@ private _fnc_avg = {
             };
         };
 
+        private _unitId = [_unit] call BIS_fnc_netId;
+        _emittedUnitIds pushBack _unitId;
         [
             "unit:upsert",
-            [[_unit] call BIS_fnc_netId, _groupId, _kind, typeOf _unit, getPosASL _unit, getDir _unit, velocity _unit, damage _unit]
+            [_unitId, _groupId, _kind, typeOf _unit, getPosASL _unit, getDir _unit, velocity _unit, damage _unit]
         ] call FUNC(call);
     } forEach _trackedUnits;
 } forEach allGroups;
+
+// A unit whose emitted id changed since last tick (e.g. it boarded or left
+// a vehicle, switching between its own id and its transport's) would
+// otherwise leave its old representation in the cache forever, since this
+// function only ever upserts.
+{
+    if !(_x in _emittedUnitIds) then {
+        ["unit:remove", [_x]] call FUNC(call);
+    };
+} forEach GVAR(trackedUnitIds);
+GVAR(trackedUnitIds) = _emittedUnitIds;

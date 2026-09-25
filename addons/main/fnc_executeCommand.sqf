@@ -28,7 +28,7 @@ private _fnc_clearWaypoints = {
 switch (_type) do {
     case "move": {
         _extra params ["_x", "_y", "_z"];
-        _group call _fnc_clearWaypoints;
+        [_group] call _fnc_clearWaypoints;
         // placementRadius -1 makes addWaypoint honor this position's z as
         // ASL (matching getPosASL, what the protocol's positions are in)
         // instead of AGL, its normal interpretation.
@@ -37,7 +37,7 @@ switch (_type) do {
     };
     case "search_and_destroy": {
         _extra params ["_x", "_y", "_z"];
-        _group call _fnc_clearWaypoints;
+        [_group] call _fnc_clearWaypoints;
         (_group addWaypoint [[_x, _y, _z], -1]) setWaypointType "SAD";
         [_id, true] call _fnc_ack;
     };
@@ -45,17 +45,22 @@ switch (_type) do {
         _extra params ["_loop"];
         private _coords = _extra select [1];
         private _count = (count _coords) / 3;
-        _group call _fnc_clearWaypoints;
+        [_group] call _fnc_clearWaypoints;
+        private _firstPos = [];
         private _lastPos = [];
         for "_i" from 0 to (_count - 1) do {
             _lastPos = _coords select [_i * 3, 3];
+            if (_i == 0) then { _firstPos = _lastPos; };
             (_group addWaypoint [_lastPos, -1]) setWaypointType "MOVE";
         };
         if (_loop) then {
-            // CYCLE is a control waypoint that redirects back to the first
-            // one; it's appended after every requested point rather than
-            // replacing the last one, which would otherwise skip it.
-            (_group addWaypoint [_lastPos, -1]) setWaypointType "CYCLE";
+            // CYCLE redirects the group to the *nearest* waypoint in the
+            // list; placed at _lastPos it would coincide with the final
+            // MOVE just added above, so "nearest" resolves to that same
+            // waypoint and the patrol degenerates into looping on just the
+            // last point. Placing it at the first point instead makes it
+            // resolve to waypoint 0, so the whole route repeats.
+            (_group addWaypoint [_firstPos, -1]) setWaypointType "CYCLE";
         };
         [_id, true] call _fnc_ack;
     };

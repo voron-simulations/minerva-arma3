@@ -10,6 +10,10 @@ if (isNil QGVAR(listenAddress)) then {
 if (isNil QGVAR(factions)) then {
     GVAR(factions) = [];
 };
+// fnc_pushState's previous-tick emitted unit ids, so it can detect ones
+// that stopped being emitted (e.g. a unit that boarded or left a vehicle,
+// switching between its own id and its transport's) and remove them.
+GVAR(trackedUnitIds) = [];
 
 ["start", [GVAR(listenAddress)]] call FUNC(call);
 ["reset"] call FUNC(call);

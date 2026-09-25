@@ -23,7 +23,9 @@ private _fnc_avg = {
 
     private _waypoints = [];
     {
-        _waypoints pushBack [str (waypointType _x), waypointPosition _x];
+        // waypointType already returns a plain string; str() would add a
+        // second layer of quoting that never matches convert::waypoint_type_from_str.
+        _waypoints pushBack [waypointType _x, waypointPosition _x];
     } forEach (waypoints _group);
 
     private _fuelLevels = (units _group) select {!isNull objectParent _x} apply {fuel (vehicle _x)};
@@ -38,8 +40,20 @@ private _fnc_avg = {
         [_groupId, str (side _group), [_fuelState, _ammoState, _healthState], _waypoints isNotEqualTo [], _waypoints]
     ] call FUNC(call);
 
+    // `units _group` gives the group's members, which for a crewed vehicle
+    // are the crew (persons), not the vehicle -- report the vehicle itself
+    // for mounted members, deduplicated (a tank's whole crew maps to one
+    // vehicle), and the person directly for dismounted ones.
+    private _trackedUnits = [];
+    {
+        _trackedUnits pushBackUnique (if (isNull objectParent _x) then {_x} else {vehicle _x});
+    } forEach (units _group);
+
     {
         private _unit = _x;
+        // `Man` inherits from `AllVehicles` in Arma's class hierarchy, so it
+        // must be excluded explicitly or every soldier is misclassified as
+        // a generic VEHICLE below.
         private _kind = "INFANTRY";
         if (_unit isKindOf "Helicopter") then {
             _kind = "HELICOPTER";
@@ -47,7 +61,7 @@ private _fnc_avg = {
             if (_unit isKindOf "Plane") then {
                 _kind = "PLANE";
             } else {
-                if (_unit isKindOf "AllVehicles") then {_kind = "VEHICLE"};
+                if (_unit isKindOf "AllVehicles" && {!(_unit isKindOf "Man")}) then {_kind = "VEHICLE"};
             };
         };
 
@@ -55,5 +69,5 @@ private _fnc_avg = {
             "unit:upsert",
             [[_unit] call BIS_fnc_netId, _groupId, _kind, typeOf _unit, getPosASL _unit, getDir _unit, velocity _unit, damage _unit]
         ] call FUNC(call);
-    } forEach (units _group);
+    } forEach _trackedUnits;
 } forEach allGroups;

@@ -47,11 +47,11 @@ pub fn position_from_asl(pos: [f64; 3]) -> proto::Position {
     }
 }
 
-/// `wind` reports a `[x, y]` vector in m/s (x: west-east, y: south-north).
-/// The protocol wants speed and direction (radians, counterclockwise from
-/// east) separately.
-pub fn wind_speed_direction(wind: [f32; 2]) -> (f32, f32) {
-    let [x, y] = wind;
+/// `wind` reports a `[x, y, z]` vector in m/s (x: west-east, y: south-north,
+/// z: always 0 -- wind is horizontal-only). The protocol wants speed and
+/// direction (radians, counterclockwise from east) separately.
+pub fn wind_speed_direction(wind: [f32; 3]) -> (f32, f32) {
+    let [x, y, _z] = wind;
     (x.hypot(y), y.atan2(x))
 }
 
@@ -111,11 +111,11 @@ mod tests {
 
     #[test]
     fn wind_speed_direction_matches_common_headings() {
-        let (speed, direction) = wind_speed_direction([1.0, 0.0]);
+        let (speed, direction) = wind_speed_direction([1.0, 0.0, 0.0]);
         assert!((speed - 1.0).abs() < 1e-6);
         assert!(direction.abs() < 1e-6); // due east -> 0 radians
 
-        let (speed, direction) = wind_speed_direction([0.0, 1.0]);
+        let (speed, direction) = wind_speed_direction([0.0, 1.0, 0.0]);
         assert!((speed - 1.0).abs() < 1e-6);
         assert!((direction - std::f32::consts::FRAC_PI_2).abs() < 1e-6); // due north -> pi/2
     }

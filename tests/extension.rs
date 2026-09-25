@@ -9,10 +9,13 @@ use arma_rs::Value;
 use minerva::init;
 use minerva_server::proto::command_service_client::CommandServiceClient;
 use minerva_server::proto::send_command_request::Command as CommandOneof;
+use minerva_server::proto::simulation_service_client::SimulationServiceClient;
 use minerva_server::proto::unit_service_client::UnitServiceClient;
 use minerva_server::proto::{
-    CommandResult, GetUnitRequest, MoveCommand, Position, SendCommandRequest,
+    CommandResult, GetSimulationInfoRequest, GetUnitRequest, MoveCommand, Position,
+    SendCommandRequest, SubscribeSimulationUpdatesRequest,
 };
+use tokio_stream::StreamExt;
 
 fn expect<T, E: Debug>(result: Result<T, E>) -> T {
     match result {
@@ -204,6 +207,60 @@ async fn unit_upsert_position_is_visible_via_grpc() {
     let unit = expect_some(response.unit);
     let position = expect_some(unit.state.and_then(|s| s.position));
     assert_eq!((position.x, position.y, position.z), (100.0, 200.0, 300.0));
+}
+
+/// Regression test for a real bug: `wind` (passed by `fnc_pushState`) is a
+/// 3-element `[x, y, z]` vector, not 2 -- `cmd_sim_state`'s param type used
+/// to require exactly 2, so every real `sim:state` call failed arg parsing
+/// and simulation state was never updated.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn sim_info_and_state_are_visible_via_grpc() {
+    let extension = init().testing();
+    let (bound, code) = extension.call("start", Some(vec![quoted("127.0.0.1:0")]));
+    assert_eq!(code, 0);
+
+    let (_, code) = extension.call(
+        "sim:info",
+        Some(vec![
+            quoted("Altis"),
+            "[15360,15360]".to_string(),
+            "[]".to_string(),
+            "[2026,1,1,0,0]".to_string(),
+        ]),
+    );
+    assert_eq!(code, 0);
+
+    // wind = [3, 4, 0] -> speed = hypot(3, 4) = 5.
+    let (_, code) = extension.call(
+        "sim:state",
+        Some(vec![
+            "[2026,1,1,0,5]".to_string(),
+            "1".to_string(),
+            "0.5".to_string(),
+            "[3,4,0]".to_string(),
+        ]),
+    );
+    assert_eq!(code, 0);
+
+    let mut simulation = expect(SimulationServiceClient::connect(format!("http://{bound}")).await);
+
+    let info = expect(
+        simulation
+            .get_simulation_info(GetSimulationInfoRequest {})
+            .await,
+    )
+    .into_inner();
+    assert_eq!(expect_some(info.info).world_name, "Altis");
+
+    let mut stream = expect(
+        simulation
+            .subscribe_simulation_updates(SubscribeSimulationUpdatesRequest {})
+            .await,
+    )
+    .into_inner();
+    let snapshot = expect(expect_some(stream.next().await));
+    let weather = expect_some(expect_some(snapshot.state).weather);
+    assert!((weather.wind_speed - 5.0).abs() < 1e-3);
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

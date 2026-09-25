@@ -635,6 +635,7 @@ dependencies = [
  "criterion",
  "minerva-server",
  "tokio",
+ "tokio-stream",
  "tonic",
  "tracing",
 ]

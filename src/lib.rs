@@ -161,7 +161,7 @@ fn cmd_sim_state(
     date: [i64; 5],
     time_acceleration: f32,
     overcast: f32,
-    wind: [f32; 2],
+    wind: [f32; 3],
 ) -> Result<(), String> {
     let (wind_speed, wind_direction) = convert::wind_speed_direction(wind);
     with_server(&ctx, |handle| {

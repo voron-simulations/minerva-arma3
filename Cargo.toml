@@ -7,6 +7,7 @@ arma-rs = "1.13"
 criterion = "0.7"
 minerva-server = { git = "https://github.com/voron-simulations/minerva-server", branch = "feat/scaffold" }
 tokio = "1"
+tokio-stream = "0.1"
 tonic = "0.14"
 tracing = "0.1"
 
@@ -28,6 +29,7 @@ tracing = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
+tokio-stream = { workspace = true }
 tonic = { workspace = true, features = ["transport"] }
 criterion = { workspace = true }
 

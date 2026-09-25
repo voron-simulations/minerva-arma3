@@ -29,13 +29,16 @@ switch (_type) do {
     case "move": {
         _extra params ["_x", "_y", "_z"];
         _group call _fnc_clearWaypoints;
-        (_group addWaypoint [[_x, _y, _z], 0]) setWaypointType "MOVE";
+        // placementRadius -1 makes addWaypoint honor this position's z as
+        // ASL (matching getPosASL, what the protocol's positions are in)
+        // instead of AGL, its normal interpretation.
+        (_group addWaypoint [[_x, _y, _z], -1]) setWaypointType "MOVE";
         [_id, true] call _fnc_ack;
     };
     case "search_and_destroy": {
         _extra params ["_x", "_y", "_z"];
         _group call _fnc_clearWaypoints;
-        (_group addWaypoint [[_x, _y, _z], 0]) setWaypointType "SAD";
+        (_group addWaypoint [[_x, _y, _z], -1]) setWaypointType "SAD";
         [_id, true] call _fnc_ack;
     };
     case "patrol": {
@@ -43,10 +46,16 @@ switch (_type) do {
         private _coords = _extra select [1];
         private _count = (count _coords) / 3;
         _group call _fnc_clearWaypoints;
+        private _lastPos = [];
         for "_i" from 0 to (_count - 1) do {
-            private _pos = _coords select [_i * 3, 3];
-            private _wp = _group addWaypoint [_pos, 0];
-            _wp setWaypointType (["MOVE", "CYCLE"] select (_loop && {_i == _count - 1}));
+            _lastPos = _coords select [_i * 3, 3];
+            (_group addWaypoint [_lastPos, -1]) setWaypointType "MOVE";
+        };
+        if (_loop) then {
+            // CYCLE is a control waypoint that redirects back to the first
+            // one; it's appended after every requested point rather than
+            // replacing the last one, which would otherwise skip it.
+            (_group addWaypoint [_lastPos, -1]) setWaypointType "CYCLE";
         };
         [_id, true] call _fnc_ack;
     };

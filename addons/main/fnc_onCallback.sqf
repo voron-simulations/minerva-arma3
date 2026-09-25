@@ -14,6 +14,6 @@ if (_name != "minerva") exitWith {};
 
 switch (_function) do {
     case "command": {
-        [parseSimpleArray _data] call FUNC(executeCommand);
+        (parseSimpleArray _data) call FUNC(executeCommand);
     };
 };

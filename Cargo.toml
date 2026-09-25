@@ -1,7 +1,20 @@
+[workspace]
+members = ["."]
+
+[workspace.dependencies]
+anyhow = "1"
+arma-rs = "1.13"
+criterion = "0.7"
+minerva-server = { git = "https://github.com/voron-simulations/minerva-server", branch = "feat/scaffold" }
+tokio = "1"
+tokio-stream = "0.1"
+tonic = "0.14"
+tracing = "0.1"
+
 [package]
 name = "minerva-arma3"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [lib]
 bench = false
@@ -9,11 +22,17 @@ crate-type = ["cdylib", "rlib"]
 name = "minerva"
 
 [dependencies]
-arma-rs = "1.11.15"
-prost = "0.14.1"
-tonic = "0.14.2"
-tonic-prost = "0.14.2"
+anyhow = { workspace = true }
+arma-rs = { workspace = true }
+minerva-server = { workspace = true }
+tracing = { workspace = true }
 
-[build-dependencies]
-glob = "0.3.3"
-tonic-prost-build = "^0.14"
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
+tokio-stream = { workspace = true }
+tonic = { workspace = true, features = ["transport"] }
+criterion = { workspace = true }
+
+[[bench]]
+name = "extension"
+harness = false

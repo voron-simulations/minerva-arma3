@@ -1,6 +1,0 @@
-[submodule "proto"]
-    branch = main
-	path = proto
-	url = https://github.com/voron-simulations/minerva-protocol.git
-	shallow = true
-	update = checkout

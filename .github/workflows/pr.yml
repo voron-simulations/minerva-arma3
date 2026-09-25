@@ -36,3 +36,10 @@ jobs:
     uses: ./.github/workflows/reusable-clippy.yml
     permissions:
       contents: read
+
+  coverage:
+    name: Coverage
+    needs: [clippy, fmt]
+    uses: ./.github/workflows/reusable-coverage.yml
+    permissions:
+      contents: read

@@ -1,3 +1,5 @@
+#include "script_component.hpp"
+
 private _function = param [0, "echo", [""]];
 private _args = param [1, [], [[]]];
 

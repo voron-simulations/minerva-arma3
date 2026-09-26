@@ -61,7 +61,13 @@ private _trackedUnits = [];
             _trackedUnits pushBackUnique _unit;
         } else {
             private _vehicle = objectParent _unit;
-            private _ownsVehicle = ([_vehicle] call FUNC(vehicleOwner)) isEqualTo _group;
+            // A destroyed vehicle hull can still seat a survivor (an
+            // armored wreck, an ejected-then-respawned-into-seat edge
+            // case); substituting it in would immediately re-upsert a
+            // damage==1 vehicle the very next push after EntityKilled
+            // already removed it. Falling back to the living crew member
+            // themselves keeps that member (and thus the group) reported.
+            private _ownsVehicle = alive _vehicle && {([_vehicle] call FUNC(vehicleOwner)) isEqualTo _group};
             _trackedUnits pushBackUnique ([_unit, _vehicle] select _ownsVehicle);
         };
     };

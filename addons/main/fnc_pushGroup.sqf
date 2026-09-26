@@ -57,21 +57,28 @@ private _hasTask = (currentWaypoint _group) < (count _waypoints);
 private _trackedUnits = [];
 {
     private _unit = _x;
-    if (isNull objectParent _unit) then {
-        _trackedUnits pushBackUnique _unit;
-    } else {
-        private _vehicle = objectParent _unit;
-        private _ownsVehicle = ([_vehicle] call _fnc_vehicleOwner) isEqualTo _group;
-        _trackedUnits pushBackUnique ([_unit, _vehicle] select _ownsVehicle);
+    // A member who died this tick is dropped here (checked on the person,
+    // before any vehicle substitution below) rather than upserted one last
+    // time: EntityKilled already sent its immediate unit:remove, and a
+    // dead unit lingers in `units _group` for a while after death, so
+    // leaving it in would otherwise re-add it as a live-looking member on
+    // this group's very next push (member replacement in
+    // upsert_group_with_units only drops what this call doesn't list).
+    // Checking the vehicle's own `alive` instead would miss exactly the
+    // case this matters for: the vehicle hull can easily outlive its last
+    // crew member, so a dead-crew vehicle would still look alive and stay
+    // tracked -- other, still-living crew (if any) still vote it in via
+    // their own iteration below, so a partially-dead crew doesn't lose it.
+    if (alive _unit) then {
+        if (isNull objectParent _unit) then {
+            _trackedUnits pushBackUnique _unit;
+        } else {
+            private _vehicle = objectParent _unit;
+            private _ownsVehicle = ([_vehicle] call _fnc_vehicleOwner) isEqualTo _group;
+            _trackedUnits pushBackUnique ([_unit, _vehicle] select _ownsVehicle);
+        };
     };
 } forEach (units _group);
-// A unit that died this tick is dropped here rather than upserted one last
-// time: EntityKilled already sent its immediate unit:remove, and a dead
-// unit lingers in `units _group` for a while after death, so leaving it in
-// would otherwise re-add it as a live-looking member on this group's very
-// next push (member replacement in upsert_group_with_units only drops what
-// this call doesn't list).
-_trackedUnits = _trackedUnits select {alive _x};
 
 // Fuel and health are over the same entities as the unit records below,
 // so a wrecked tank with an unhurt crew doesn't report a healthy group,

@@ -9,9 +9,10 @@ behaves the same way on any of these points.
 
 - `SimulationInfo.world_size` reports Arma's `worldSize` for both `x_meters` and
   `y_meters` -- the current adapter doesn't distinguish a non-square map.
-- Timestamps are derived from Arma's `date` array, which has no seconds component: every
-  `simulation_start_*_time`/`SimulationStateUpdate.simulation_time` is truncated to the
-  minute.
+- `simulation_start_sim_time` and `SimulationStateUpdate.simulation_time` are derived
+  from Arma's `date` array, which has no seconds component, so both are truncated to the
+  minute. `simulation_start_real_time` is not: it's `SystemTime::now()` at `sim:info`
+  time, wall-clock, full second precision.
 
 ## Readiness and loadout
 

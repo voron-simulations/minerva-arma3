@@ -47,6 +47,46 @@ pub fn position_from_asl(pos: [f64; 3]) -> proto::Position {
     }
 }
 
+/// Builds the `Unit` embedded in a `group:upsert` call. `group_id` is left
+/// empty: the server fills it in from the containing group
+/// (`StateCache::upsert_group_with_units`), so a unit embedded in a group's
+/// upsert can't disagree with which group it's actually in.
+#[allow(clippy::too_many_arguments)]
+pub fn unit_from_parts(
+    id: String,
+    kind: &str,
+    unit_type: String,
+    pos_asl: [f64; 3],
+    dir: f32,
+    velocity: [f32; 3],
+    damage: f32,
+) -> proto::Unit {
+    proto::Unit {
+        id,
+        group_id: String::new(),
+        category: unit_category_from_str(kind) as i32,
+        r#type: unit_type,
+        state: Some(proto::UnitState {
+            position: Some(position_from_asl(pos_asl)),
+            orientation: Some(proto::Orientation {
+                direction: dir,
+                pitch: 0.0,
+                roll: 0.0,
+            }),
+            velocity: Some(proto::Velocity {
+                x: velocity[0],
+                y: velocity[1],
+                z: velocity[2],
+            }),
+            health: Some(proto::HealthState {
+                health: health_from_damage(damage),
+                damage_effects: Vec::new(),
+            }),
+            loadout: None,
+        }),
+    }
+}
+
 /// `wind` reports a `[x, y, z]` vector in m/s (x: west-east, y: south-north,
 /// z: always 0 -- wind is horizontal-only). The protocol wants speed and
 /// direction (radians, counterclockwise from east) separately.

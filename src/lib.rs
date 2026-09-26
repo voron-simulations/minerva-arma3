@@ -68,12 +68,7 @@ pub fn init() -> Extension {
                 .command("upsert", cmd_group_upsert)
                 .command("remove", cmd_group_remove),
         )
-        .group(
-            "unit",
-            Group::new()
-                .command("upsert", cmd_unit_upsert)
-                .command("remove", cmd_unit_remove),
-        )
+        .group("unit", Group::new().command("remove", cmd_unit_remove))
         .group("command", Group::new().command("ack", cmd_command_ack))
         .finish()
 }
@@ -128,7 +123,7 @@ fn cmd_reset(ctx: Context) -> Result<bool, String> {
 fn cmd_sim_info(
     ctx: Context,
     world_name: String,
-    world_size: Vec<f64>,
+    world_size: [f64; 2],
     factions: Vec<(String, String)>,
     start_date: [i64; 5],
 ) -> Result<(), String> {
@@ -144,7 +139,10 @@ fn cmd_sim_info(
     with_server(&ctx, |handle| {
         handle.state().set_simulation_info(proto::SimulationInfo {
             world_name,
-            world_size,
+            world_size: Some(proto::WorldSize {
+                x_meters: world_size[0],
+                y_meters: world_size[1],
+            }),
             factions,
             simulation_start_sim_time: convert::unix_time_from_arma_date(start_date),
             simulation_start_real_time: std::time::SystemTime::now()
@@ -180,6 +178,12 @@ fn cmd_sim_state(
     })
 }
 
+/// A `group:upsert` unit arg: `(id, kind, type, posASL, dir, velocity,
+/// damage)`. No `group_id` -- the server fills that in from the containing
+/// group's own id.
+type GroupUpsertUnit = (String, String, String, [f64; 3], f32, [f32; 3], f32);
+
+#[allow(clippy::too_many_arguments)]
 fn cmd_group_upsert(
     ctx: Context,
     id: String,
@@ -187,6 +191,7 @@ fn cmd_group_upsert(
     readiness: [f32; 3],
     has_task: bool,
     waypoints: Vec<(String, [f64; 3])>,
+    units: Vec<GroupUpsertUnit>,
 ) -> Result<(), String> {
     let side = convert::side_from_str(&side)?;
     let waypoints = waypoints
@@ -196,18 +201,30 @@ fn cmd_group_upsert(
             position: Some(convert::position_from_asl(position)),
         })
         .collect();
+    let units = units
+        .into_iter()
+        .map(
+            |(unit_id, kind, unit_type, pos_asl, dir, velocity, damage)| {
+                convert::unit_from_parts(unit_id, &kind, unit_type, pos_asl, dir, velocity, damage)
+            },
+        )
+        .collect();
     with_server(&ctx, |handle| {
-        handle.state().upsert_group(proto::Group {
-            id,
-            side: side as i32,
-            readiness: Some(proto::GroupReadiness {
-                fuel_state: readiness[0],
-                ammo_state: readiness[1],
-                health_state: readiness[2],
-            }),
-            has_task,
-            waypoints,
-        });
+        handle.state().upsert_group_with_units(
+            proto::Group {
+                id,
+                side: side as i32,
+                readiness: Some(proto::GroupReadiness {
+                    fuel_state: readiness[0],
+                    ammo_state: readiness[1],
+                    health_state: readiness[2],
+                }),
+                has_task,
+                waypoints,
+                units: Vec::new(),
+            },
+            units,
+        );
         Ok(())
     })
 }
@@ -215,47 +232,6 @@ fn cmd_group_upsert(
 fn cmd_group_remove(ctx: Context, id: String) -> Result<bool, String> {
     with_server(&ctx, |handle| {
         Ok(handle.state().remove_group(&GroupId::from(id)).is_some())
-    })
-}
-
-#[allow(clippy::too_many_arguments)]
-fn cmd_unit_upsert(
-    ctx: Context,
-    id: String,
-    group_id: String,
-    kind: String,
-    unit_type: String,
-    pos_asl: [f64; 3],
-    dir: f32,
-    velocity: [f32; 3],
-    damage: f32,
-) -> Result<(), String> {
-    with_server(&ctx, |handle| {
-        handle.state().upsert_unit(proto::Unit {
-            id,
-            group_id,
-            category: convert::unit_category_from_str(&kind) as i32,
-            r#type: unit_type,
-            state: Some(proto::UnitState {
-                position: Some(convert::position_from_asl(pos_asl)),
-                orientation: Some(proto::Orientation {
-                    direction: dir,
-                    pitch: 0.0,
-                    roll: 0.0,
-                }),
-                velocity: Some(proto::Velocity {
-                    x: velocity[0],
-                    y: velocity[1],
-                    z: velocity[2],
-                }),
-                health: Some(proto::HealthState {
-                    health: convert::health_from_damage(damage),
-                    damage_effects: Vec::new(),
-                }),
-                loadout: None,
-            }),
-        });
-        Ok(())
     })
 }
 

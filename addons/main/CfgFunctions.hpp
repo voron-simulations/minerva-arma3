@@ -6,7 +6,9 @@ class CfgFunctions {
     class ADDON {
         class COMPONENT {
             PATHTO_FNC(call);
-            PATHTO_FNC(pushState);
+            PATHTO_FNC(pushGroup);
+            PATHTO_FNC(schedulePush);
+            PATHTO_FNC(requestGroupPush);
             PATHTO_FNC(onCallback);
             PATHTO_FNC(executeCommand);
         };

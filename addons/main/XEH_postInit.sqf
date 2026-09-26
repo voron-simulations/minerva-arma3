@@ -10,10 +10,13 @@ if (isNil QGVAR(listenAddress)) then {
 if (isNil QGVAR(factions)) then {
     GVAR(factions) = [];
 };
-// fnc_pushState's previous-tick emitted unit ids, so it can detect ones
-// that stopped being emitted (e.g. a unit that boarded or left a vehicle,
-// switching between its own id and its transport's) and remove them.
-GVAR(trackedUnitIds) = [];
+// fnc_schedulePush's push cycle: the (snapshotted) groups still due a push
+// this cycle, and where in it the cursor is.
+GVAR(cycle) = [];
+GVAR(cycleCursor) = 0;
+// Groups fnc_requestGroupPush has marked for an out-of-band push on the
+// very next frame.
+GVAR(dirtyGroups) = [];
 
 ["start", [GVAR(listenAddress)]] call FUNC(call);
 ["reset"] call FUNC(call);
@@ -25,6 +28,9 @@ addMissionEventHandler ["EntityKilled", {
     params ["_unit"];
     if (_unit isKindOf "Man" || {_unit isKindOf "AllVehicles"}) then {
         ["unit:remove", [[_unit] call BIS_fnc_netId]] call FUNC(call);
+        // Readiness (health/fuel averages) and membership shouldn't wait
+        // up to TICK seconds to reflect a kill.
+        [group _unit] call FUNC(requestGroupPush);
     };
 }];
 
@@ -43,4 +49,4 @@ addMissionEventHandler ["GroupDeleted", {
 addMissionEventHandler ["Ended", {["reset"] call FUNC(call);}];
 addMissionEventHandler ["MPEnded", {["reset"] call FUNC(call);}];
 
-[FUNC(pushState), TICK, []] call CBA_fnc_addPerFrameHandler;
+[FUNC(schedulePush), 0, []] call CBA_fnc_addPerFrameHandler;

@@ -1,5 +1,5 @@
 use arma_rs::{Context, Value};
-use minerva_server::proto::Position;
+use minerva_server::proto::CommandTarget;
 use minerva_server::{Command, CommandId, CommandSink};
 
 /// Dispatches commands into Arma via an `ExtensionCallback`
@@ -22,10 +22,14 @@ impl CommandSink for ArmaCommandSink {
     fn dispatch(&self, id: CommandId, command: &Command) {
         let id: u64 = id.into();
         let (kind, group_id, extra) = match command {
-            Command::Move { group_id, position } => ("move", group_id, position_values(position)),
-            Command::SearchAndDestroy { group_id, position } => {
-                ("search_and_destroy", group_id, position_values(position))
+            Command::Move { group_id, position } => {
+                ("move", group_id, command_target_values(position))
             }
+            Command::SearchAndDestroy { group_id, position } => (
+                "search_and_destroy",
+                group_id,
+                command_target_values(position),
+            ),
             Command::DefendZone {
                 group_id,
                 zone_id,
@@ -33,7 +37,7 @@ impl CommandSink for ArmaCommandSink {
             } => {
                 let mut extra = vec![Value::String(zone_id.clone())];
                 if let Some(position) = position {
-                    extra.extend(position_values(position));
+                    extra.extend(command_target_values(position));
                 }
                 ("defend_zone", group_id, extra)
             }
@@ -43,7 +47,7 @@ impl CommandSink for ArmaCommandSink {
                 loop_,
             } => {
                 let mut extra = vec![Value::Boolean(*loop_)];
-                extra.extend(waypoints.iter().flat_map(position_values));
+                extra.extend(waypoints.iter().flat_map(command_target_values));
                 ("patrol", group_id, extra)
             }
             Command::Support {
@@ -76,10 +80,18 @@ impl CommandSink for ArmaCommandSink {
     }
 }
 
-fn position_values(position: &Position) -> Vec<Value> {
+/// `z` is absent for a target the caller only knows in the map plane (e.g.
+/// a click on a 2D map) -- encoded as an empty array, vs. a one-element
+/// array when present, since callback payloads have no null. See
+/// `fnc_executeCommand.sqf` for how each side is placed.
+fn command_target_values(target: &CommandTarget) -> Vec<Value> {
+    let z = match target.z {
+        Some(z) => vec![Value::Number(z)],
+        None => Vec::new(),
+    };
     vec![
-        Value::Number(position.x),
-        Value::Number(position.y),
-        Value::Number(position.z),
+        Value::Number(target.x),
+        Value::Number(target.y),
+        Value::Array(z),
     ]
 }

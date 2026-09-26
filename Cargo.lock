@@ -634,7 +634,7 @@ dependencies = [
 [[package]]
 name = "minerva-server"
 version = "0.1.0"
-source = "git+https://github.com/voron-simulations/minerva-server?rev=4c5f6a562f37a1e00444f9ba5b443d40522ebebf#4c5f6a562f37a1e00444f9ba5b443d40522ebebf"
+source = "git+https://github.com/voron-simulations/minerva-server?rev=98c336ba00f81d1451db9e8ef7b4eabf39ab2751#98c336ba00f81d1451db9e8ef7b4eabf39ab2751"
 dependencies = [
  "anyhow",
  "async-trait",

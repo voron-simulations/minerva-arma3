@@ -5,7 +5,7 @@ members = ["."]
 anyhow = "1"
 arma-rs = "1.13"
 criterion = "0.7"
-minerva-server = { git = "https://github.com/voron-simulations/minerva-server", rev = "4c5f6a562f37a1e00444f9ba5b443d40522ebebf" }
+minerva-server = { git = "https://github.com/voron-simulations/minerva-server", rev = "98c336ba00f81d1451db9e8ef7b4eabf39ab2751" }
 tokio = "1"
 tokio-stream = "0.1"
 tonic = "0.14"

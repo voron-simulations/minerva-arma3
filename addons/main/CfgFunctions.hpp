@@ -7,6 +7,7 @@ class CfgFunctions {
         class COMPONENT {
             PATHTO_FNC(call);
             PATHTO_FNC(pushGroup);
+            PATHTO_FNC(vehicleOwner);
             PATHTO_FNC(schedulePush);
             PATHTO_FNC(requestGroupPush);
             PATHTO_FNC(onCallback);

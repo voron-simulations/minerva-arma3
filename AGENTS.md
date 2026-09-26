@@ -41,7 +41,9 @@ previously reported under this group but missing from this call's list is droppe
 `fnc_pushGroup.sqf` builds it from `units _group` filtered to `alive` (a unit that died
 this tick is dropped here too, not upserted one last time -- `unit:remove` already
 reported it immediately). A crewed vehicle's whole crew maps to one `VEHICLE`/`HELICOPTER`/
-`PLANE` entry (see `fnc_pushGroup.sqf`'s `_fnc_vehicleOwner`), not one entry per crewman.
+`PLANE` entry (see `fnc_vehicleOwner.sqf`), not one entry per crewman. `XEH_postInit.sqf`'s
+`EntityKilled` handler re-derives a killed crew member's vehicle's owner and dirties that
+group too, since a kill can hand the vehicle to another group's surviving crew.
 
 ## The `minerva-server` dependency
 

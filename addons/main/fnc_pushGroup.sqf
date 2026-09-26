@@ -18,22 +18,6 @@ private _fnc_avg = {
     _sum / (count _values);
 };
 
-// Returns the group that owns a vehicle's record: that of the first unit
-// in a real crew seat (driver, then commander/gunner/turrets in fullCrew's
-// fixed order), or grpNull if only passengers (cargo/FFV) are aboard. One
-// deterministic owner per vehicle stops two groups sharing it -- as crew or
-// as passengers -- from alternately upserting it under their own group ids.
-private _fnc_vehicleOwner = {
-    params ["_vehicle"];
-    private _seats = fullCrew [_vehicle, "", false];
-    // A dead occupant must not win the seat search: a live crewman from
-    // another group would then fail the caller's ownership check and the
-    // vehicle would go unreported by anyone until the corpse leaves the seat.
-    private _crewSeat = _seats findIf {(_x select 1) != "cargo" && {!(_x select 4)} && {alive (_x select 0)}};
-    if (_crewSeat < 0) exitWith {grpNull};
-    group (_seats select _crewSeat select 0)
-};
-
 private _groupId = [_group] call BIS_fnc_netId;
 
 private _waypoints = [];
@@ -77,7 +61,7 @@ private _trackedUnits = [];
             _trackedUnits pushBackUnique _unit;
         } else {
             private _vehicle = objectParent _unit;
-            private _ownsVehicle = ([_vehicle] call _fnc_vehicleOwner) isEqualTo _group;
+            private _ownsVehicle = ([_vehicle] call FUNC(vehicleOwner)) isEqualTo _group;
             _trackedUnits pushBackUnique ([_unit, _vehicle] select _ownsVehicle);
         };
     };

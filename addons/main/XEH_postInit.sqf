@@ -31,6 +31,15 @@ addMissionEventHandler ["EntityKilled", {
         // Readiness (health/fuel averages) and membership shouldn't wait
         // up to TICK seconds to reflect a kill.
         [group _unit] call FUNC(requestGroupPush);
+        // A dead real-seat occupant can hand the vehicle's record to
+        // another group's surviving crew (fnc_vehicleOwner, recomputed
+        // here now that _unit is already dead); that group's own regular
+        // turn is up to TICK away, so it needs the same out-of-band push
+        // as the group that just lost the vehicle.
+        private _vehicle = objectParent _unit;
+        if (!isNull _vehicle) then {
+            [[_vehicle] call FUNC(vehicleOwner)] call FUNC(requestGroupPush);
+        };
     };
 }];
 

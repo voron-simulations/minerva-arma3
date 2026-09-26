@@ -42,55 +42,58 @@ class ScenarioData
 {
 	author="minerva";
 };
-class Intel
+class Mission
 {
-	timeOfChanges=1800.0001;
-	startWeather=0.30000001;
-	startWind=0.1;
-	startWaves=0.1;
-	forecastWeather=0.30000001;
-	forecastWind=0.1;
-	forecastWaves=0.1;
-	forecastLightnings=0.1;
-	year=2026;
-	month=9;
-	day=26;
-	hour=10;
-	minute=0;
-	startFogDecay=0.014;
-	forecastFogDecay=0.014;
-};
-class Entities
-{
-	items=1;
-	class Item0
+	class Intel
 	{
-		dataType="Group";
-		side="West";
-		class Entities
+		timeOfChanges=1800.0001;
+		startWeather=0.30000001;
+		startWind=0.1;
+		startWaves=0.1;
+		forecastWeather=0.30000001;
+		forecastWind=0.1;
+		forecastWaves=0.1;
+		forecastLightnings=0.1;
+		year=2026;
+		month=9;
+		day=26;
+		hour=10;
+		minute=0;
+		startFogDecay=0.014;
+		forecastFogDecay=0.014;
+	};
+	class Entities
+	{
+		items=1;
+		class Item0
 		{
-			items=1;
-			class Item0
+			dataType="Group";
+			side="West";
+			class Entities
 			{
-				dataType="Object";
-				class PositionInfo
+				items=1;
+				class Item0
 				{
-					position[]={0,0,0};
+					dataType="Object";
+					class PositionInfo
+					{
+						position[]={0,0,0};
+					};
+					side="West";
+					flags=7;
+					class Attributes
+					{
+						isPlayable=1;
+						isPlayer=1;
+					};
+					id=2;
+					type="B_Soldier_F";
 				};
-				side="West";
-				flags=7;
-				class Attributes
-				{
-					isPlayable=1;
-					isPlayer=1;
-				};
-				id=2;
-				type="B_Soldier_F";
 			};
+			class Attributes
+			{
+			};
+			id=1;
 		};
-		class Attributes
-		{
-		};
-		id=1;
 	};
 };

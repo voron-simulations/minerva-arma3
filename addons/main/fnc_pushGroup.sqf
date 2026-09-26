@@ -26,7 +26,10 @@ private _fnc_avg = {
 private _fnc_vehicleOwner = {
     params ["_vehicle"];
     private _seats = fullCrew [_vehicle, "", false];
-    private _crewSeat = _seats findIf {(_x select 1) != "cargo" && {!(_x select 4)}};
+    // A dead occupant must not win the seat search: a live crewman from
+    // another group would then fail the caller's ownership check and the
+    // vehicle would go unreported by anyone until the corpse leaves the seat.
+    private _crewSeat = _seats findIf {(_x select 1) != "cargo" && {!(_x select 4)} && {alive (_x select 0)}};
     if (_crewSeat < 0) exitWith {grpNull};
     group (_seats select _crewSeat select 0)
 };

@@ -21,6 +21,7 @@ show_output = true
 workshop = [
     "450814997", # CBA_A3
 ]
+mission = "minerva_test.VR"
 parameters = [
     "-skipIntro",
     "-noSplash",

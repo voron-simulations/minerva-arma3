@@ -4,7 +4,7 @@ members = ["."]
 [workspace.dependencies]
 anyhow = "1"
 arma-rs = "1.13"
-criterion = "0.7"
+criterion = "0.8"
 minerva-server = { git = "https://github.com/voron-simulations/minerva-server", rev = "93a2966091522eb477f83cfda9a4b67410553dea" }
 tokio = "1"
 tokio-stream = "0.1"
